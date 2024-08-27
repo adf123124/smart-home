@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 홈 보안 기능</title>
+    <style>
+        /* 기본 스타일 설정 */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        /* 비디오 화면의 크기 설정 */
+        #video {
+            width: 80%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        /* 버튼 스타일 설정 */
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>스마트 홈 보안 - 기능</h1>
+    <!-- 실시간 비디오 화면 -->
+    <video id="video" autoplay></video>
+    <br>
+    <!-- 각 기능을 위한 버튼 -->
+    <button id="startBtn">실시간 화면 보기</button>
+    <button id="recordBtn">녹화 시작</button>
+    <button id="captureBtn">사진 촬영</button>
+    <button id="alertBtn">경보 발생</button>
+
+    <script>
+        // 비디오 요소와 버튼 요소 가져오기
+        let video = document.getElementById('video');
+        let startBtn = document.getElementById('startBtn');
+        let recordBtn = document.getElementById('recordBtn');
+        let captureBtn = document.getElementById('captureBtn');
+        let alertBtn = document.getElementById('alertBtn');
+
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        // 실시간 화면 보기 버튼 클릭 이벤트 핸들러
+        startBtn.addEventListener('click', async () => {
+            try {
+                // 사용자 미디어 장치에 접근하여 비디오 스트림 가져오기
+                let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('미디어 장치 접근 오류.', err);
+            }
+        });
+
+        // 녹화 시작/중지 버튼 클릭 이벤트 핸들러
+        recordBtn.addEventListener('click', () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop(); // 녹화 중지
+                recordBtn.textContent = '녹화 시작';
+            } else {
+                startRecording(); // 녹화 시작
+            }
+        });
+
+        // 사진 촬영 버튼 클릭 이벤트 핸들러
+        captureBtn.addEventListener('click', () => {
+            capturePhoto();
+        });
+
+        // 경보 발생 버튼 클릭 이벤트 핸들러
+        alertBtn.addEventListener('click', () => {
+            triggerAlert();
+        });
+
+        // 녹화 시작 함수
+        function startRecording() {
+            let stream = video.srcObject;
+            if (!stream) {
+                alert('먼저 실시간 화면을 시작하세요.');
+                return;
+            }
+            
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            mediaRecorder.onstop = () => {
+                let blob = new Blob(recordedChunks, { type: 'video/webm' });
+                let url = URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = '녹화영상.webm';
+                a.click();
+                recordedChunks = [];
+            };
+
+            mediaRecorder.start();
+            recordBtn.textContent = '녹화 중지';
+        }
+
+        // 사진 촬영 함수
+        function capturePhoto() {
+            let canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            let context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let a = document.createElement('a');
+            a.href = canvas.toDataURL('image/png');
+            a.download = '캡처.png';
+            a.click();
+        }
+
+        // 경보 발생 함수
+        function triggerAlert() {
+            alert('경보가 발생했습니다!'); // 경보 발생 - 실제 경보 시스템과 연결 필요
+            // 이 부분에 실제 경보 시스템 연동 코드 추가 가능
+        }
+
+        // 창문 클릭 시 경고 메시지 표시
+        setInterval(() => {
+            let alertMessage = localStorage.getItem('alertMessage');
+            if (alertMessage) {
+                new Notification("침입 경고!", {
+                    body: alertMessage,
+                });
+                localStorage.removeItem('alertMessage');
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
