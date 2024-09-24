@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>House</title>
+    <title>스마트 홈 보안 - House</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,7 +19,7 @@
     </style>
 </head>
 <body>
-    <h1>Smart Home Security - House</h1>
+    <h1>스마트 홈 보안 - House</h1>
     <svg id="house" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
         <!-- House structure -->
         <rect x="50" y="60" width="100" height="100" fill="lightgrey" stroke="black" />
@@ -31,33 +31,18 @@
     </svg>
 
     <script>
-        // 알림 권한 요청
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-
         let window1 = document.getElementById('window1');
         let window2 = document.getElementById('window2');
 
         window1.addEventListener('click', () => {
             localStorage.setItem('alertMessage', 'Someone has intruded through Window 1!');
-            notifyUser('Alert', 'Someone has intruded through Window 1!');
-            window.open('functions.html', '_blank'); // 기능 화면을 새 창으로 열기
+            window.open('functions.html'); // 새로운 창에서 열기
         });
 
         window2.addEventListener('click', () => {
             localStorage.setItem('alertMessage', 'Someone has intruded through Window 2!');
-            notifyUser('Alert', 'Someone has intruded through Window 2!');
-            window.open('functions.html', '_blank'); // 기능 화면을 새 창으로 열기
+            window.open('functions.html'); // 새로운 창에서 열기
         });
-
-        function notifyUser(title, message) {
-            if (Notification.permission === "granted") {
-                new Notification(title, {
-                    body: message,
-                });
-            }
-        }
     </script>
 </body>
 </html>
